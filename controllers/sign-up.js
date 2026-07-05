@@ -7,6 +7,7 @@ async function getSignUp(req, res) {
 async function postSignUp(req, res) {
     try {
     const {username, email, password} = req.body;
+    const userCount = await prisma.user.count();
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await prisma.user.create({
         data: {
