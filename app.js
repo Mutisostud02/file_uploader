@@ -14,7 +14,6 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.use(Express.urlencoded({ extended : true}))
 app.use(Express.static(path.join(__dirname, 'public')))
-app.use('/uploads', Express.static(path.join(__dirname, 'uploads')))
 
 //pg-prisma session configurations
 const connectionString = `${process.env.DATABASE_URL}`;
@@ -22,6 +21,8 @@ const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 //session configurations
+app.set("trust proxy", 1);
+
 app.use(session({
     store: new PrismaSessionStore(
         prisma,
@@ -34,7 +35,12 @@ app.use(session({
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }    
+    cookie: { 
+        maxAge: 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        sameSite: "lax"
+     }    
 }))
 
 app.use(passport.session())
