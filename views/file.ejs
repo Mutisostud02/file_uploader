@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View file</title>
+</head>
+<body style="display: flex;
+  justify-content: center;
+  min-height: 20vh;"
+>
+    <div style="margin:2rem; padding: 1rem; background-color: skyblue; display: flex; flex-direction:column; min-width: 40vw; max-width: 50vw;">
+        <div style="display:flex;justify-content:space-between;">
+            <h3><%=file.originalName%></h3>
+            <p><%=new Date(file.created_at).toLocaleString()%></p><br/>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+            <p style="margin-top: 2px;"><a href="<%=file.file_url%>" >View</a></p>
+            <a href="/fileUploader/files/download/<%= file.id %>">
+                Download
+            </a>
+            <form 
+            onsubmit="return confirm('Move this file to trash?')"
+            action="/fileUploader/files/delete/<%=file.id%>" method="POST" style="border:none; padding:0; margin:0;"
+            >
+                <button type="submit" style="color:red">Delete</button>
+            </form>
+        </div>
+    </div>    
+</body>
+</html>

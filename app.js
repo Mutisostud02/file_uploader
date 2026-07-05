@@ -14,6 +14,7 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.use(Express.urlencoded({ extended : true}))
 app.use(Express.static(path.join(__dirname, 'public')))
+app.use('/uploads', Express.static(path.join(__dirname, 'uploads')))
 
 //pg-prisma session configurations
 const connectionString = `${process.env.DATABASE_URL}`;
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
     res.locals.currentUser = req.user;
     next()
 })
+
 
 //import route files
 const signUp = require('./routes/sign-up.js')

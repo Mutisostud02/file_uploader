@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit folder</title>
+</head>
+<body>
+    <form method="POST" action="/folders/<%=folder.id%>/edit">
+        <label>Folder name</label>
+        <input 
+        type="text" 
+        name="folder_name"
+        value="<%=folder.name%>"
+        required>
+        <input type="submit" value="save"/>
+    </form>
+    <p>
+        <a href="/fileUploader">Cancel</a>
+    </p>
+    
+</body>
+</html>

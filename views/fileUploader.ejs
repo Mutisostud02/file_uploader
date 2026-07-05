@@ -3,10 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
     <title>File Uploader</title>
 </head>
-<body>
-    <h2>File Uploader</h2>
-    <p><a href="/logout">log-out</a></p>
+<body class="file-uploader">   
+
+    <header>
+        <h2>File Uploader</h2>
+        <div>
+            <a href="/">Home</a>
+            <a href="/logout">Log-out</a>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                Toggle Theme
+            </button>
+        </div>
+    </header>
+    <% if(deleted) {%>
+        <p id="flash-message" style="color:red; padding:4px;" class="success">File deleted successfully</p>
+    <%}%>
+    <% if(created) {%>
+        <p id="flash-message" style="color:green; padding:4px;" class="success">Folder created successfully</p>
+    <%}%>
+    <% if (updated) { %>
+        <p id="flash-message" class="success" style="color:skyblue; padding:4px;">Folder updated successfully.</p>
+    <% } %>   
+    <main>
+        <h1>Upload your files here</h1>
+        <form method="POST" action="/folders">
+            <label for="create_folder">Create Folder: </label>
+            <input id="create_folder" name="folder_name" placeholder="Folder name" required/>
+            <input type="submit" value="submit">
+        </form>
+    <form enctype="multipart/form-data" class="file-upload-box" method="POST" action="/fileUploader">
+        <h4 style="margin: 1px;">Upload folder</h4>
+        <select name="folderId">
+            <option value="">None</option>
+            <% folders.forEach(folder => { %>
+                <option value="<%=folder.id%>">
+                    <%=folder.name%>
+                </option>
+            <%})%>
+        </select>
+        <input id="file" type="file" name="files" multiple required><br>
+        <input type="submit" value="upload">
+    </form>
+    <div class="user-files">
+    <div class="heading">
+
+        <h2>Your Files</h2>
+        <p class="username">User: <strong><%= user.username %></strong></p>
+    </div>
+    <ul class="folder-list">
+        <% folders.forEach(folder => { %>
+            <li class="folder-card">
+                <div class="folder-info" style="display: flex; flex-direction:column">                
+                    <h4 style="display:flex; justify-content: space-around;">
+                        <a href="/fileUploader/folders/<%=folder.id%>" style="text-decoration:none; margin-left:0;">
+                            <%= folder.name%>
+                        </a>
+                        <!-- edit functionality PUT -->
+                        <p style="margin:0"><a href="/folders/<%=folder.id%>/edit">edit</a></p>
+                    </h4>
+                    <small><%= folder.files.length %> files</small>                
+                    <p><%= new Date(folder.created_at).toLocaleString()%></p>
+                    <form 
+                        onsubmit="return confirm('All files in the folder will be deleted, are you sure?')"
+                        action="/folders/delete/<%=folder.id%>" method="POST" style="border:none; padding:0; margin:0;">
+                            <button type="submit" style="color:red">Delete</button>
+                    </form>
+                </div>
+            </li>
+        <%})%>
+    </ul>
+
+    <% if (files.length === 0) { %>
+        <p class="empty">No files uploaded yet.</p>
+    <% } else { %>
+        <ul class="file-list">
+            <% files.forEach(file => { %>
+                <li class="file-card">
+                    <div class="file-info">
+                        <h4><%= file.originalName%></h4>
+                        <a href="/fileUploader/files/<%=file.id%>" target="_blank">
+                            View File
+                        </a>
+                    </div>
+
+                    <div class="file-meta">
+                        <p>Uploaded: <%= new Date(file.created_at).toLocaleString() %></p>
+                        <form 
+                        onsubmit="return confirm('Move this file to trash?')"
+                        action="/fileUploader/delete/<%=file.id%>" method="POST" style="border:none; padding:0; margin:0;">
+                            
+                            <button type="submit" style="color:red">Delete</button>
+                        </form>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    <% } %>
+</div>
+    </main>
+    <footer>
+        <p>Copyright &copy; 2026</p>
+        <div>
+            <a href="/">Home</a>
+            <a href="/logout">Log-out</a>
+        </div>
+    </footer>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+
+            // save preference
+            if (document.body.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        //flash creation, deletion and update messages
+        const flash = document.getElementById("flash-message");
+
+        if(flash) {
+            setTimeout(() => {
+                flash.remove();
+            }, 3000)
+        }
+
+        // load saved theme
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+        };
+    </script>
 </body>
 </html>

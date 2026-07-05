@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder/<%=folder.id%></title>
+</head>
+<body>
+    <h4>User <%= currentUser.username%> Files</h4>
+    <% if(files.length < 1) {%>
+    <ul>
+        <li>No files</li>
+    </ul>       
+    <%}%>
+    <ul>
+        <% files.forEach(file => {%>
+            <p><%=file.originalName%></p>
+            <p><a href="<%=file.file_url%>">view file</a></p>
+            <a href="/fileUploader/files/download/<%= file.id %>">
+                Download
+            </a>
+            <form 
+                onsubmit="return confirm('Move this file to trash?')"
+                action="/fileUploader/folders/delete/<%=file.id%>" method="POST" style="border:none; padding:0; margin:0;">
+                    <button type="submit" style="color:red">Delete</button>
+            </form>
+        <%})%>
+    </ul>
+</body>
+</html>
