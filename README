@@ -1,3 +1,4 @@
+//Project uses prisma and postegresql for database
 //to this project, we'll make an admin user, that can see every user on the app and be able to see their files, messages and posts.
 //build functionality for users to share their files to other users
 //admin can delete users, users can delete their files
