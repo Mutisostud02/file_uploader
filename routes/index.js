@@ -7,7 +7,6 @@ const express = require('express')
 const multer  = require('multer');
 const { prisma } = require('../lib/prisma');
 const fs = require("fs/promises");
-const upload = multer({ dest: 'uploads/' })
 const cloudinary = require('../lib/cloudinary.js')
 
 //routes
@@ -26,26 +25,61 @@ index.post('/folders/delete/:id', isAuthenticated, home.deleteFolder)
 index.post('/fileUploader/folders/delete/:id', isAuthenticated, home.deleteFile)
 index.get('/fileUploader/files/download/:id', isAuthenticated, home.downloadFile)
 
+//multer config validate
+const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/zip",
+    "text/plain",
+];
+
+const upload = multer({
+    dest: "uploads/",
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB
+    },
+    fileFilter(req, file, cb) {
+        if (allowedMimeTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Unsupported file type"));
+        }
+    },
+});
 
 
 //multer routes
-index.post('/fileUploader', upload.array('files', 10), async function (req, res, next) {
+index.post("/fileUploader", (req, res, next) => {
+    upload.array("files", 10)(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            if (err.code === "LIMIT_FILE_SIZE") {
+                return res.status(400).send("Each file must be smaller than 10 MB.");
+            }
+        }
+
+        if (err) {
+            return res.status(400).send(err.message);
+        }
+
+        next();
+    });
+}, async (req, res, next) => {
     try {
         console.log(req.files)
         const folderId = req.body.folderId ? Number(req.body.folderId) : null
-        // await prisma.file.createMany({
-        //     data: req.files.map(file => ({
-        //     file_url: file.path,
-        //     originalName: file.originalname,
-        //     userId: req.user.id,
-        //     folderId,
-        //     }))
-        // })
 
         await Promise.all(
             req.files.map(async (file) => {
             try {
-                const result = await cloudinary.uploader.upload(file.path);
+                const result = await cloudinary.uploader.upload(file.path, {
+                    resource_type: "auto",
+                });
 
                 await prisma.file.create({
                     data: {
