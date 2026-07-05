@@ -13,6 +13,7 @@ async function postSignUp(req, res) {
             username: username,
             email: email,
             password: hashedPassword,
+            isAdmin: userCount === 0,
         }
     })
     res.send("User sign-up successful")
